@@ -56,31 +56,11 @@ import (
 	"time"
 )
 
-// Prefix is a Markov chain prefix of one or more words.
-type Prefix []string
-
-// String returns the Prefix as a string (for use as a map key).
-func (p Prefix) String() string {
-	return strings.Join(p, " ")
-}
-
+/*
 // Shift removes the first word from the Prefix and appends the given word.
 func (p Prefix) Shift(word string) {
 	copy(p, p[1:])
 	p[len(p)-1] = word
-}
-
-// Chain contains a map ("chain") of prefixes to a list of suffixes.
-// A prefix is a string of prefixLen words joined with spaces.
-// A suffix is a single word. A prefix can have multiple suffixes.
-type Chain struct {
-	chain     map[string][]string
-	prefixLen int
-}
-
-// NewChain returns a new Chain with prefixes of prefixLen words.
-func NewChain(prefixLen int) *Chain {
-	return &Chain{make(map[string][]string), prefixLen}
 }
 
 // Build reads text from the provided Reader and
@@ -114,17 +94,106 @@ func (c *Chain) Generate(n int) string {
 	}
 	return strings.Join(words, " ")
 }
+*/
 
-func main() {
-	// Register command-line flags.
-	numWords := flag.Int("words", 100, "maximum number of words to print")
-	prefixLen := flag.Int("prefix", 2, "prefix length in words")
+const (
+	MaxArrowShotDistance = 6		// +1 for '0' stopper
+	MAXLinksInRoom = 25		// a complex cave
+	MinLinksInRoom = 2
+	MaxRoomsInCave = 250
+	MinRoomsInCave = 10
+)
 
-	flag.Parse()                     // Parse command-line flags.
-	rand.Seed(time.Now().UnixNano()) // Seed the random number generator.
+const (		// levels of play
+	EasyGame = iota
+	HardGame = iota
+)
 
-	c := NewChain(*prefixLen)     // Initialize a new Chain.
-	c.Build(os.Stdin)             // Build chains from standard input.
-	text := c.Generate(*numWords) // Generate text.
-	fmt.Println(text)             // Write text to standard output.
+// Debug is true when debugging information is output.
+var Debug bool
+
+// Chain contains a map ("chain") of prefixes to a list of suffixes.
+// A prefix is a string of prefixLen words joined with spaces.
+// A suffix is a single word. A prefix can have multiple suffixes.
+type Room struct {
+	tunnel []int
+	hasPit bool
+	hasBat bool
+}
+
+// Cave is a collecion of rooms.
+type Cave []Room
+
+// String returns the Prefix as a string (for use as a map key).
+func (p Prefix) String() string {
+	return strings.Join(p, " ")
+}
+
+// NewChain returns a new Chain with prefixes of prefixLen words.
+func NewRoom(prefixLen int) *Room {
+	return &Chain{make(map[string][]string), prefixLen}
+}
+	instructions();
+	cave_init();
+
+	for (;;) {
+		initialize_things_in_cave();
+		arrows_left = arrow_num;
+		do {
+			display_room_stats();
+			(void)printf("Move or shoot? (m-s) ");
+			(void)fflush(stdout);
+			if (!fgets(answer, sizeof(answer), stdin))
+				break;
+		} while (!take_action());
+
+    switch {
+    case t.Hour() < 12:
+        fmt.Println("Good morning!")
+    case t.Hour() < 17:
+        fmt.Println("Good afternoon.")
+    default:
+        fmt.Println("Good evening.")
+    }
+		if (!getans("\nCare to play another game? (y-n) "))
+			exit(0);
+		if (getans("In the same cave? (y-n) "))
+			clear_things_in_cave();
+		else
+			cave_init();
+	}
+
+func plural(n int) string {
+	if s < 1 {
+		return "s"
+	}
+	return ""
+}
+
+// NewChain returns a new Chain with prefixes of prefixLen words.
+func NewCave(pits int, bats int, rooms int, links int, arrows int) (Cave, error) {
+	switch {
+	case rooms < MinRoomsInCave:
+		return nil, Errorf("No self-respecting wumpus would live in such a small cave!")
+	case rooms > MaxRoomsInCave:
+		return nil, Errorf("Even wumpii can't furnish caves that large!")
+	case links < MinLinksInRoom:
+		return nil, Errorf("Wumpii like extra doors in their caves!")
+	case links > MAXLinksInRoom || links > rooms - (rooms / 4):
+		return nil, Errorf("Too many tunnels!  The cave collapsed!\n(Fortunately, the wumpus escaped!)")
+	case bats > rooms / 2:
+		return nil, Errorf("The wumpus refused to enter the cave, claiming it was too crowded!")
+	case pit_num > room_num / 2:
+		return nil, Errorf("The wumpus refused to enter the cave, claiming it was too dangerous!")
+	}
+//	default:
+//	return &Chain{make(map[string][]string), prefixLen}
+}
+
+func Wumpus(in io.Reader, out io.Writer) (bool, error) {
+    
+
+
+
+
 }
